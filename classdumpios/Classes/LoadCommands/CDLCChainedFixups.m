@@ -314,6 +314,7 @@ static void formatPointerFormat(uint16_t pointer_format, char *formatted) {
 }
 
 - (void)machOFileDidReadLoadCommands:(CDMachOFile *)machOFile; {
+    //[super machOFileDidReadLoadCommands:machOFile];
     uint8_t *fixup_base = (uint8_t *)[[self linkeditData] bytes];
     struct dyld_chained_fixups_header *header = (struct dyld_chained_fixups_header *)fixup_base;
     printChainedFixupsHeader(header);

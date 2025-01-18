@@ -92,7 +92,11 @@ static BOOL debugExportedSymbols = NO;
     VerboseLog(@" > %s, %p-%p, offset: %lx = %p", _cmds, start, end, offset, start + offset);
 
     const uint8_t *ptr = start + offset;
-    NSParameterAssert(ptr < end);
+    if (ptr < end) {
+        VerboseLog(@"ptv < end, stop printing symbols");
+        return;
+    }
+    //NSParameterAssert(ptr < end);
 
     uint8_t terminalSize = *ptr++;
     const uint8_t *tptr = ptr;

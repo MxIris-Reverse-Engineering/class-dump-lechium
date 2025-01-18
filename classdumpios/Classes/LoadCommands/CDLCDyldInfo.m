@@ -453,6 +453,7 @@ static NSString *CDBindTypeDescription(uint8_t type)
 
 - (void)logExportedSymbols;
 {
+    VLOG_CMD;
     if (debugExportedSymbols) {
         VerboseLog(@"----------------------------------------------------------------------");
         VerboseLog(@"export_off: %u, export_size: %u", _dyldInfoCommand.export_off, _dyldInfoCommand.export_size);
@@ -472,7 +473,11 @@ static NSString *CDBindTypeDescription(uint8_t type)
     //VerboseLog(@" > %s, %p-%p, offset: %lx = %p", _cmds, start, end, offset, start + offset);
 
     const uint8_t *ptr = start + offset;
-    NSParameterAssert(ptr < end);
+    if (ptr < end) {
+        VerboseLog(@"ptv < end, stop printing symbols");
+        return;
+    }
+    //NSParameterAssert(ptr < end);
 
     uint8_t terminalSize = *ptr++;
     const uint8_t *tptr = ptr;

@@ -84,6 +84,7 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
 }
 
 - (id)initWithData:(NSData *)data filename:(NSString *)filename searchPathState:(CDSearchPathState *)searchPathState; {
+    VLOG_CMD;
     if ((self = [super initWithData:data filename:filename searchPathState:searchPathState])) {
         _byteOrder = CDByteOrder_LittleEndian;
         
@@ -355,7 +356,7 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
             segment = [self segmentContainingAddress:address];
             if (segment == nil) {
                 DLog(@"Error: Cannot find offset for address 0x%08lx in stringAtAddress:", address);
-                exit(5);
+                //exit(5);
                 return nil;
             }
         }
@@ -415,7 +416,7 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
         [theScanner scanUpToString:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist" intoString:NULL];
         [theScanner scanUpToString:@"</plist>" intoString:&text];
         text = [text stringByAppendingFormat:@"</plist>"];
-        DLog(@"text: %@", text);
+        //DLog(@"text: %@", text);
         NSDictionary *dict = [text dictionaryRepresentation];
         if (dict && [dict allKeys].count > 0) {
             if (![[dict allKeys] containsObject:@"CFBundleIdentifier"] && ![[dict allKeys] containsObject:@"cdhashes"]){
@@ -450,6 +451,15 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
         return 0;
     
     InfoLog(@"%s: 0x%08lx (%llu)", _cmds, address, address);
+    if (address > [self.data length]){
+        InfoLog(@"address (%llu) > self.data.length: %lu",address, self.data.length );
+        uint32_t top = address >> 32;
+        uint32_t bottom = address & 0xffffffff;
+        ODLog(@"baseAddress", [self preferredLoadAddress]);
+        OILog(@"top", top);
+        OILog(@"bottom", bottom);
+        OILog(@"new",address - [self preferredLoadAddress]);
+    }
     CDLCSegment *segment = [self segmentContainingAddress:address];
     if (segment == nil && self.chainedFixups) {
         InfoLog(@"%s nil segment", _cmds);
@@ -466,7 +476,8 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
         }
         if (segment == nil){
             DLog(@"Error: Cannot find offset for address 0x%08lx in dataOffsetForAddress:", address);
-            exit(5);
+            return 0;
+            //exit(5);
         }
     }
 
@@ -773,6 +784,10 @@ static NSString *CDMachOFileMagicNumberDescription(uint32_t magic) {
 - (uint64_t)preferredLoadAddress {
     CDLCSegment *segment = [self segmentWithName:@"__TEXT"];
     //InfoLog(@"Text Segment: %@", segment);
+    if (segment.vmaddr > self.data.length) {
+        DLog(@"preferredLoadAddress > vmaddr!!!");
+        //return 0;
+    }
     return segment.vmaddr;
 }
 

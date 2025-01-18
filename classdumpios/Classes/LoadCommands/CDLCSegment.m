@@ -76,6 +76,14 @@ NSString *CDSegmentEncryptionTypeName(CDSegmentEncryptionType type)
         _segmentCommand.nsects   = [cursor readInt32];
         _segmentCommand.flags    = [cursor readInt32];
         
+        if (_segmentCommand.fileoff != _segmentCommand.vmaddr) {
+            VerboseLog(@"file offset and vmaddr aren't equal!");
+            if (_segmentCommand.vmaddr > _segmentCommand.filesize) {
+                VerboseLog(@"vm addr is greater than filesize! this will not work, try setting vmaddr to fileoff");
+                //_segmentCommand.vmaddr = _segmentCommand.fileoff;
+            }
+        }
+        
         NSMutableArray *sections = [[NSMutableArray alloc] init];
         for (NSUInteger index = 0; index < _segmentCommand.nsects; index++) {
             CDSection *section = [[CDSection alloc] initWithDataCursor:cursor segment:self];

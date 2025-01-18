@@ -230,8 +230,8 @@
     [resultString appendFormat:@" cmdsize %u\n", [self cmdsize]];
 }
 
-- (void)machOFileDidReadLoadCommands:(CDMachOFile *)machOFile;
-{
+- (void)machOFileDidReadLoadCommands:(CDMachOFile *)machOFile {
+    //VerboseLog(@"hexdump -Cv -s %u -n %u", _dyldInfoCommand.export_off, _dyldInfoCommand.export_size);
 }
 
 @end
